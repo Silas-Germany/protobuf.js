@@ -407,11 +407,14 @@ function buildType(ref, type) {
             firstField = false;
         }
         if (field.repeated)
-            push(escapeName(type.name) + ".prototype" + prop + " = $util.emptyArray;"); // overwritten in constructor
+          null;
+            // push(escapeName(type.name) + ".prototype" + prop + " = $util.emptyArray;"); // overwritten in constructor
         else if (field.map)
-            push(escapeName(type.name) + ".prototype" + prop + " = $util.emptyObject;"); // overwritten in constructor
+            null;
+            // push(escapeName(type.name) + ".prototype" + prop + " = $util.emptyObject;"); // overwritten in constructor
         else if (field.partOf)
-            push(escapeName(type.name) + ".prototype" + prop + " = null;"); // do not set default value for oneof members
+            null;
+            // push(escapeName(type.name) + ".prototype" + prop + " = null;"); // do not set default value for oneof members
         else if (field.long)
             push(escapeName(type.name) + ".prototype" + prop + " = $util.Long ? $util.Long.fromBits("
                     + JSON.stringify(field.typeDefault.low) + ","
@@ -419,8 +422,8 @@ function buildType(ref, type) {
                     + JSON.stringify(field.typeDefault.unsigned)
                 + ") : " + field.typeDefault.toNumber(field.type.charAt(0) === "u") + ";");
         else if (field.bytes) {
-            push(escapeName(type.name) + ".prototype" + prop + " = $util.newBuffer(" + JSON.stringify(Array.prototype.slice.call(field.typeDefault)) + ");");
-        } else
+            push(escapeName(type.name) + ".prototype" + prop + " = new Uint8Array();");
+        } else if (field.typeDefault !== null && field.typeDefault !== 'null')
             push(escapeName(type.name) + ".prototype" + prop + " = " + JSON.stringify(field.typeDefault) + ";");
     });
 
@@ -575,6 +578,7 @@ function buildType(ref, type) {
         ]);
         buildFunction(type, "toObject", protobuf.converter.toObject(type));
 
+        /*
         push("");
         pushComment([
             "Converts this " + type.name + " to JSON.",
@@ -588,6 +592,7 @@ function buildType(ref, type) {
             push("return this.constructor.toObject(this, $protobuf.util.toJSONOptions);");
         --indent;
         push("};");
+         */
     }
 }
 
@@ -633,45 +638,20 @@ function buildService(ref, service) {
 
     service.methodsArray.forEach(function(method) {
         method.resolve();
-        var lcName = protobuf.util.lcFirst(method.name),
-            cbName = escapeName(method.name + "Callback");
+        var lcName = protobuf.util.lcFirst(method.name);
         push("");
         pushComment([
-            "Callback as used by {@link " + exportName(service) + "#" + escapeName(lcName) + "}.",
-            // This is a more specialized version of protobuf.rpc.ServiceCallback
-            "@memberof " + exportName(service),
-            "@typedef " + cbName,
-            "@type {function}",
-            "@param {Error|null} error Error, if any",
-            "@param {" + exportName(method.resolvedResponseType) + "} [response] " + method.resolvedResponseType.name
+            lcName + " RPC method.",
+            "@member {ProtobufMethod<" + method.resolvedRequestType.fullName.slice(1) + (method.requestStream ? "[]" : "") + ", " + method.resolvedResponseType.fullName.slice(1) + (method.responseStream ? "[]" : "") + ">} " + lcName,
+            "@memberof " + method.fullName.split('.').slice(1, -1).join('.'),
         ]);
-        push("");
-        pushComment([
-            method.comment || "Calls " + method.name + ".",
-            "@function " + lcName,
-            "@memberof " + exportName(service),
-            "@instance",
-            "@param {" + exportName(method.resolvedRequestType, !config.forceMessage) + "} request " + method.resolvedRequestType.name + " message or plain object",
-            "@param {" + exportName(service) + "." + cbName + "} callback Node-style callback called with the error, if any, and " + method.resolvedResponseType.name,
-            "@returns {undefined}",
-            "@variation 1"
-        ]);
-        push("Object.defineProperty(" + escapeName(service.name) + ".prototype" + util.safeProp(lcName) + " = function " + escapeName(lcName) + "(request, callback) {");
+        push(escapeName(service.name) + util.safeProp(lcName) + " = new ProtobufMethod(");
             ++indent;
-            push("return this.rpcCall(" + escapeName(lcName) + ", $root." + exportName(method.resolvedRequestType) + ", $root." + exportName(method.resolvedResponseType) + ", request, callback);");
+        push("$root, " + JSON.stringify(method.fullName.slice(1)) + ",");
+        push(JSON.stringify(!!method.requestStream) + ", " + JSON.stringify(method.resolvedRequestType.fullName.slice(1)) + ",");
+        push(JSON.stringify(!!method.responseStream) + ", " + JSON.stringify(method.resolvedResponseType.fullName.slice(1)) + ",");
             --indent;
-        push("}, \"name\", { value: " + JSON.stringify(method.name) + " });");
-        if (config.comments)
-            push("");
-        pushComment([
-            method.comment || "Calls " + method.name + ".",
-            "@function " + lcName,
-            "@memberof " + exportName(service),
-            "@instance",
-            "@param {" + exportName(method.resolvedRequestType, !config.forceMessage) + "} request " + method.resolvedRequestType.name + " message or plain object",
-            "@returns {Promise<" + exportName(method.resolvedResponseType) + ">} Promise",
-            "@variation 2"
-        ]);
+        push(");");
     });
 }
 

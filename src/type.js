@@ -204,8 +204,7 @@ Type.generateConstructor = function generateConstructor(mtype) {
         else if (field.repeated) gen
             ("this%s=[]", util.safeProp(field.name));
     return gen
-    ("if(p)for(var ks=Object.keys(p),i=0;i<ks.length;++i)if(p[ks[i]]!=null)") // omit undefined or null
-        ("this[ks[i]]=p[ks[i]]");
+    ("if(p) Object.entries(p).forEach(function (e) {if (e[1] != null) this[e[0]] = e[1]})"); // omit undefined or null
     /* eslint-enable no-unexpected-multiline */
 };
 

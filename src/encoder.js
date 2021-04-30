@@ -84,7 +84,7 @@ function encoder(mtype) {
         // Non-repeated
         } else {
             if (field.optional) gen
-    ("if(%s!=null&&Object.hasOwnProperty.call(m,%j))", ref, field.name); // !== undefined && !== null
+            ("if(%s)", ref); // !== undefined && !== null && !== default type ('', 0, enum-0)
 
             if (wireType === undefined)
         genTypePartial(gen, field, index, ref);

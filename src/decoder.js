@@ -77,10 +77,10 @@ function decoder(mtype) {
                 ("%s[k]=value", ref);
 
         // Repeated fields
-        } else if (field.repeated) { gen
-
-                ("if(!(%s&&%s.length))", ref, ref)
-                    ("%s=[]", ref);
+        } else if (field.repeated) {
+            // gen
+                // ("if(!(%s&&%s.length))", ref, ref)
+                //     ("%s=[]", ref);
 
             // Packable (always check for forward and backward compatiblity)
             if (types.packed[type] !== undefined) gen

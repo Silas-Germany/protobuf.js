@@ -34,7 +34,7 @@ function genValuePartial_fromObject(gen, field, fieldIndex, prop) {
             ("}");
         } else gen
             ("if(typeof d%s!==\"object\")", prop)
-                ("throw TypeError(%j)", field.fullName + ": object expected")
+                ("throw TypeError(%j)", field.name + ": object expected")
             ("m%s=types[%i].fromObject(d%s)", prop, fieldIndex, prop);
     } else {
         var isUnsigned = false;
@@ -69,9 +69,9 @@ function genValuePartial_fromObject(gen, field, fieldIndex, prop) {
                     ("m%s=new util.LongBits(d%s.low>>>0,d%s.high>>>0).toNumber(%s)", prop, prop, prop, isUnsigned ? "true" : "");
                 break;
             case "bytes": gen
-                ("if(typeof d%s===\"string\")", prop)
-                    ("util.base64.decode(d%s,m%s=util.newBuffer(util.base64.length(d%s)),0)", prop, prop, prop)
-                ("else if(d%s.length)", prop)
+                // ("if(typeof d%s===\"string\")", prop)
+                //     ("util.base64.decode(d%s,m%s=util.newBuffer(util.base64.length(d%s)),0)", prop, prop, prop)
+                ("if(d%s.length)", prop)
                     ("m%s=d%s", prop, prop);
                 break;
             case "string": gen
@@ -112,7 +112,7 @@ converter.fromObject = function fromObject(mtype) {
         if (field.map) { gen
     ("if(d%s){", prop)
         ("if(typeof d%s!==\"object\")", prop)
-            ("throw TypeError(%j)", field.fullName + ": object expected")
+            ("throw TypeError(%j)", field.name + ": object expected")
         ("m%s={}", prop)
         ("for(var ks=Object.keys(d%s),i=0;i<ks.length;++i){", prop);
             genValuePartial_fromObject(gen, field, /* not sorted */ i, prop + "[ks[i]]")
@@ -123,8 +123,8 @@ converter.fromObject = function fromObject(mtype) {
         } else if (field.repeated) { gen
     ("if(d%s){", prop)
         ("if(!Array.isArray(d%s))", prop)
-            ("throw TypeError(%j)", field.fullName + ": array expected")
-        ("m%s=[]", prop)
+            ("throw TypeError(%j)", field.name + ": array expected")
+        // ("m%s=[]", prop)
         ("for(var i=0;i<d%s.length;++i){", prop);
             genValuePartial_fromObject(gen, field, /* not sorted */ i, prop + "[i]")
         ("}")
@@ -278,7 +278,7 @@ converter.toObject = function toObject(mtype) {
             genValuePartial_toObject(gen, field, /* sorted */ index, prop + "[j]")
         ("}");
         } else { gen
-    ("if(m%s!=null&&m.hasOwnProperty(%j)){", prop, field.name); // !== undefined && !== null
+    ("if(m%s){", prop); // !== undefined && !== null && != default value
         genValuePartial_toObject(gen, field, /* sorted */ index, prop);
         if (field.partOf) gen
         ("if(o.oneofs)")
