@@ -36,6 +36,10 @@ function encoder(mtype) {
     // "when a message is serialized its known fields should be written sequentially by field number"
     var fields = /* initializes */ mtype.fieldsArray.slice().sort(util.compareFieldsById);
 
+    var oneofs = [];
+    Object.values(mtype.oneofs || {}).forEach(oneOf => {
+        oneofs.push(...oneOf.oneof);
+    })
     for (var i = 0; i < fields.length; ++i) {
         var field    = fields[i].resolve(),
             index    = mtype._fieldsArray.indexOf(field),
@@ -83,8 +87,12 @@ function encoder(mtype) {
 
         // Non-repeated
         } else {
-            if (field.optional) gen
-            ("if(%s)", ref); // !== undefined && !== null && !== default type ('', 0, enum-0)
+            if (field.optional) {
+                if (oneofs.some(e => e === field.name)) gen
+                ("if(%s != null)", ref); // !== undefined && !== null
+                else gen
+                ("if(%s)", ref); // !== undefined && !== null && !== default type ('', 0, enum-0)
+            }
 
             if (wireType === undefined)
         genTypePartial(gen, field, index, ref);
