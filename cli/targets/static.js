@@ -366,6 +366,12 @@ function buildType(ref, type) {
             var prop = util.safeProp(field.name); // either .name or ["name"]
             prop = prop.substring(1, prop.charAt(0) === "[" ? prop.length - 1 : prop.length);
             var jsType = toJsType(field);
+            const typeParts = jsType.split('.');
+            if (typeParts.length === 3 && typeParts.slice(0, 2).join('.') === 'sil.rev79') {
+                jsType = (typeParts.slice(0, 1).concat(`I${typeParts[2]}`)).join('.');
+            } else if (typeParts.length === 4 && typeParts.slice(0, 3).join('.') === 'sil.rev79.database') {
+                jsType = (typeParts.slice(0, 2).concat(`I${typeParts[2]}`)).join('.');
+            }
             if (field.optional)
                 jsType = jsType + "|null";
             typeDef.push("@property {" + jsType + "} " + (field.optional ? "[" + prop + "]" : prop) + " " + (field.comment || type.name + " " + field.name));
