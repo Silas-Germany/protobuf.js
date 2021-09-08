@@ -651,7 +651,7 @@ function buildService(ref, service) {
         push("");
         pushComment([
             lcName + " RPC method.",
-            "@member {ProtobufMethod<" + method.resolvedRequestType.fullName.slice(1) + (method.requestStream ? "[]" : "") + ", " + method.resolvedResponseType.fullName.slice(1) + (method.responseStream ? "[]" : "") + ">} " + lcName,
+            "@member {ProtobufMethod<" + method.resolvedRequestType.fullName.slice(1) + (method.requestStream ? "[]" : "") + ", " + method.resolvedResponseType.fullName.slice(1) + (method.responseStream ? "[]" : "") + (!method.resolvedResponseType.fullName.includes('sil.rev79.database') ? ", unknown" : ", ApiInterfaces.I" + lcName.replace(/^[a-z]/, firstLetter => firstLetter.toUpperCase())) + ">} " + lcName,
             "@memberof " + method.fullName.split('.').slice(1, -1).join('.'),
         ]);
         push(escapeName(service.name) + util.safeProp(lcName) + " = new ProtobufMethod(");
