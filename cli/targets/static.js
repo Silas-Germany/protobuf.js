@@ -397,7 +397,7 @@ function buildType(ref, type) {
 
     // default values
     var firstField = true;
-    if (config.comments) {
+    if (config.comments && type.fullName.includes('.database.')) {
         pushComment([
             type.name + " dbTableName.",
             "@member {'" + type.name + "'|undefined} dbTableName",
