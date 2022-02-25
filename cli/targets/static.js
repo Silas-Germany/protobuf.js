@@ -133,6 +133,10 @@ function buildNamespace(ref, ns) {
             ns.parent instanceof protobuf.Root ? "@exports " + escapeName(ns.name) : "@memberof " + exportName(ns.parent),
             "@namespace"
         ]);
+        pushComment([
+            ns.parent instanceof protobuf.Root ? "@exports " + escapeName(ns.name) : "@memberof " + exportName(ns.parent),
+            "@class",
+        ]);
         push((config.es6 ? "const" : "var") + " " + escapeName(ns.name) + " = {};");
     }
 
