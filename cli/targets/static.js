@@ -376,7 +376,7 @@ function buildType(ref, type) {
                 interfaceType= prefix + (typeParts.slice(0, 3).concat(`I${typeParts[3]}`)).join('.');
             }
             if (field.optional)
-                jsType = jsType + "|null";
+                jsType = jsType + "|undefined";
             typeDef.push("@property {" + (['null', ''].includes(String(field.defaultValue)) ? interfaceType : jsType) + "} " + (field.optional ? "[" + prop + "]" : prop) + " " + (field.comment || type.name + " " + field.name));
         });
         push("");
@@ -412,7 +412,7 @@ function buildType(ref, type) {
             push("");
             var jsType = toJsType(field);
             if (field.optional && !field.map && !field.repeated && field.resolvedType instanceof Type || field.partOf)
-                jsType = jsType + "|null|undefined";
+                jsType = jsType + "|undefined";
             pushComment([
                 field.comment || type.name + " " + field.name + ".",
                 "@member {" + jsType + "} " + field.name,
