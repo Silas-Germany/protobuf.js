@@ -362,7 +362,6 @@ function buildType(ref, type) {
             type.parent instanceof protobuf.Root ? "@exports " + escapeName("I" + type.name) : "@memberof " + exportName(type.parent),
             "@interface " + escapeName("I" + type.name)
         ];
-        typeDef.push("@property {'"+ type.name + "'} [dbTableName] Name of the table in the db");
         type.fieldsArray.forEach(function(field) {
             var prop = util.safeProp(field.name); // either .name or ["name"]
             prop = prop.substring(1, prop.charAt(0) === "[" ? prop.length - 1 : prop.length);
@@ -398,6 +397,14 @@ function buildType(ref, type) {
 
     // default values
     var firstField = true;
+    if (config.comments) {
+        pushComment([
+            type.name + " dbTableName.",
+            "@member {'" + type.name + "'|undefined} dbTableName",
+            "@memberof " + exportName(type),
+            "@instance"
+        ]);
+    }
     type.fieldsArray.forEach(function(field) {
         field.resolve();
         var prop = util.safeProp(field.name);
