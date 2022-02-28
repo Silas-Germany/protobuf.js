@@ -607,14 +607,6 @@ function buildType(ref, type) {
         push("};");
          */
     }
-    if (config.comments && type.fullName.includes('.database.')) {
-        pushComment([
-            type.name + " dbTableName.",
-            "@member {'" + type.name + "'|undefined} dbTableName",
-            "@memberof " + exportName(type),
-            "@instance"
-        ]);
-    }
 }
 
 function buildService(ref, service) {
